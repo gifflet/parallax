@@ -1,0 +1,105 @@
+# Default configuration for parallel-dev command
+version: "2.0"
+
+# Core execution settings
+defaults:
+  max_agents: 5
+  review_mode: balanced
+  branch_pattern: "feature/task-{id}"
+  worktree_dir: ".worktrees"
+  
+# Feature toggles
+features:
+  auto_cleanup: true          # Clean up merged branches automatically
+  progress_display: true      # Show real-time progress
+  state_persistence: true     # Save state for resume capability
+  interactive_conflicts: true # Interactive merge conflict resolution
+  auto_retry: true           # Retry failed operations
+  notifications: true        # Show desktop notifications (if available)
+  
+# Execution timeouts (in seconds)
+timeouts:
+  agent_idle: 300            # 5 minutes - Max idle time for an agent
+  task_max: 3600            # 1 hour - Maximum time per task
+  review_max: 900           # 15 minutes - Maximum review time
+  correction_max: 1800      # 30 minutes - Maximum correction time
+  
+# Resource limits
+resources:
+  max_memory_mb: 2048       # Maximum memory per agent
+  max_worktrees: 10         # Maximum concurrent worktrees
+  disk_space_warning_gb: 5  # Warn when less than 5GB available
+  
+# Quality gates
+quality:
+  min_test_coverage: 80     # Minimum test coverage percentage
+  lint_required: true       # Must pass linting
+  format_required: true     # Must be properly formatted
+  docs_required: true       # Must include documentation
+  
+# Git settings
+git:
+  auto_stash: true          # Stash changes before operations
+  force_push_protected: false  # Prevent force push to protected branches
+  sign_commits: false       # GPG sign commits
+  
+# Review modes configuration
+review_modes:
+  strict:
+    require_all_tests_pass: true
+    require_documentation: true
+    require_changelog: true
+    max_corrections: 3
+    
+  balanced:
+    require_all_tests_pass: true
+    require_documentation: true
+    require_changelog: false
+    max_corrections: 5
+    
+  lenient:
+    require_all_tests_pass: false
+    require_documentation: false
+    require_changelog: false
+    max_corrections: 10
+    
+# Agent configurations
+agents:
+  developer:
+    timeout: 2400           # 40 minutes
+    max_retries: 2
+    
+  reviewer:
+    timeout: 900            # 15 minutes
+    max_retries: 1
+    
+  corrector:
+    timeout: 1200           # 20 minutes
+    max_retries: 3
+    
+  finalizer:
+    timeout: 600            # 10 minutes
+    max_retries: 1
+    
+# Logging configuration
+logging:
+  level: info               # debug, info, warn, error
+  file: ".worktrees/.parallel-dev.log"
+  max_size_mb: 50
+  rotation_count: 5
+  format: json              # json or text
+  
+# Notification settings
+notifications:
+  on_task_complete: true
+  on_task_failed: true
+  on_all_complete: true
+  on_conflict: true
+  sound_enabled: false
+  
+# Performance optimizations
+performance:
+  parallel_file_operations: true
+  cache_dependency_analysis: true
+  lazy_load_task_details: true
+  compression_enabled: true

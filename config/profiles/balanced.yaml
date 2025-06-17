@@ -1,0 +1,108 @@
+# Balanced Profile - Default configuration for most projects
+# Optimizes for reliability and speed equally
+
+execution:
+  max_agents: 5
+  agent_distribution:
+    developer: 3
+    reviewer: 1
+    shared_pool: 1  # Can be corrector or finalizer
+  
+  timeouts:
+    development: 3600000     # 60 minutes
+    review: 1200000         # 20 minutes
+    correction: 1800000     # 30 minutes
+    finalization: 600000    # 10 minutes
+  
+  retry_policy:
+    max_attempts: 2
+    backoff_multiplier: 1.5
+    initial_delay: 5000
+
+quality:
+  review_mode: "balanced"
+  
+  requirements:
+    test_coverage: 80
+    documentation_level: "essential"
+    linting_strictness: "warning"
+    
+  code_quality:
+    max_complexity: 10
+    max_file_length: 500
+    max_function_length: 50
+    
+  testing:
+    required_test_types:
+      - unit
+      - integration
+    parallel_test_execution: true
+    fail_fast: false
+
+git:
+  branch_pattern: "feature/task-{id}"
+  commit_style: "conventional"
+  squash_commits: false
+  rebase_before_merge: true
+  
+  worktree:
+    location: ".worktrees"
+    cleanup_strategy: "on_merge"
+    preserve_failed: true
+
+automation:
+  auto_merge:
+    enabled: true
+    method: "squash"
+    delete_branch_on_merge: true
+    wait_for_checks: true
+    
+  pr_creation:
+    draft_if_wip: true
+    add_reviewers: true
+    add_labels: true
+    
+  notifications:
+    on_task_complete: true
+    on_pr_created: true
+    on_errors: true
+
+resource_limits:
+  max_disk_usage: 1073741824  # 1GB
+  max_memory_per_agent: 512    # MB
+  max_concurrent_operations: 10
+  
+monitoring:
+  progress_display: "compact"
+  update_interval: 5000
+  log_level: "info"
+  
+  metrics:
+    track_performance: true
+    track_quality: true
+    generate_reports: true
+
+error_handling:
+  recovery_strategy: "aggressive"
+  checkpoint_frequency: 300000  # 5 minutes
+  preserve_on_error: true
+  
+  escalation:
+    critical_errors_threshold: 3
+    auto_rollback: false
+    notify_on_critical: true
+
+features:
+  parallel_testing: true
+  incremental_builds: true
+  smart_conflict_resolution: true
+  dependency_caching: true
+  
+integrations:
+  task_master:
+    auto_update_status: true
+    sync_interval: 60000
+    
+  github:
+    use_gh_cli: true
+    api_rate_limit_buffer: 100

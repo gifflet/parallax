@@ -1,0 +1,15 @@
+name: parallel-dev
+version: 1.0.0
+description: Multi-agent development orchestration system for concurrent task implementation with Task Master integration
+author: gifflet
+repository: https://github.com/gifflet/parallel-dev
+entry: index.md
+tags:
+  - development
+  - automation
+  - multi-agent
+  - task-management
+  - git-workflow
+  - orchestration
+  - parallel-processing
+  - code-review

@@ -1,0 +1,107 @@
+# Aggressive Profile - Maximum speed and parallelization
+# Best for projects with good test coverage and CI/CD
+
+execution:
+  max_agents: 10
+  agent_distribution:
+    developer: 7
+    reviewer: 2
+    shared_pool: 1
+  
+  timeouts:
+    development: 2400000     # 40 minutes
+    review: 900000          # 15 minutes
+    correction: 1200000     # 20 minutes
+    finalization: 300000    # 5 minutes
+  
+  retry_policy:
+    max_attempts: 1
+    backoff_multiplier: 1.2
+    initial_delay: 2000
+
+quality:
+  review_mode: "lenient"
+  
+  requirements:
+    test_coverage: 60
+    documentation_level: "minimal"
+    linting_strictness: "error_only"
+    
+  code_quality:
+    max_complexity: 15
+    max_file_length: 1000
+    max_function_length: 100
+    
+  testing:
+    required_test_types:
+      - unit
+    parallel_test_execution: true
+    fail_fast: true
+
+git:
+  branch_pattern: "feat/{id}"
+  commit_style: "conventional"
+  squash_commits: true
+  rebase_before_merge: false
+  
+  worktree:
+    location: ".worktrees"
+    cleanup_strategy: "immediate"
+    preserve_failed: false
+
+automation:
+  auto_merge:
+    enabled: true
+    method: "squash"
+    delete_branch_on_merge: true
+    wait_for_checks: false  # Aggressive - merge when possible
+    
+  pr_creation:
+    draft_if_wip: false
+    add_reviewers: false  # Let auto-assignment handle it
+    add_labels: true
+    
+  notifications:
+    on_task_complete: false  # Reduce noise
+    on_pr_created: true
+    on_errors: true
+
+resource_limits:
+  max_disk_usage: 2147483648   # 2GB
+  max_memory_per_agent: 1024   # MB
+  max_concurrent_operations: 20
+  
+monitoring:
+  progress_display: "minimal"
+  update_interval: 10000  # Less frequent updates
+  log_level: "warning"
+  
+  metrics:
+    track_performance: true
+    track_quality: false  # Skip for speed
+    generate_reports: false
+
+error_handling:
+  recovery_strategy: "fail_fast"
+  checkpoint_frequency: 600000  # 10 minutes
+  preserve_on_error: false
+  
+  escalation:
+    critical_errors_threshold: 1
+    auto_rollback: true
+    notify_on_critical: true
+
+features:
+  parallel_testing: true
+  incremental_builds: true
+  smart_conflict_resolution: false  # Use simple strategies
+  dependency_caching: true
+  
+integrations:
+  task_master:
+    auto_update_status: true
+    sync_interval: 120000  # Less frequent
+    
+  github:
+    use_gh_cli: true
+    api_rate_limit_buffer: 50  # More aggressive API usage
