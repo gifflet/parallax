@@ -1,169 +1,172 @@
-**ARGUMENT PARSING MODULE**
+**ARGUMENT PARSER MODULE**
 
 Parse CLI arguments with validation, type checking, and default values.
 
-**INPUT:** $ARGUMENTS string from command invocation
+**CORE CONCEPTS:**
+- Flexible argument parsing (flags, options, positional)
+- Type validation and constraints
+- Default values and aliases
+- Help text generation
 
-**PARSING LOGIC:**
+**ARGUMENT STRUCTURE:**
+```
+OPTIONS = {
+    max_agents: { type: "number", default: 5, min: 1, max: 20 },
+    review_mode: { type: "string", default: "balanced", enum: ["strict", "balanced", "lenient"] },
+    profile: { type: "string", default: null },
+    branch_pattern: { type: "string", default: "feature/task-{id}" },
+    status: { type: "boolean", default: false },
+    resume: { type: "boolean", default: false },
+    dry_run: { type: "boolean", default: false },
+    help: { type: "boolean", default: false }
+}
+
+ALIASES = {
+    "-m": "--max-agents",
+    "-r": "--review",
+    "-p": "--profile",
+    "-b": "--branch",
+    "-h": "--help"
+}
+```
+
+**MAIN FUNCTION:**
 
 ```
 FUNCTION parse_arguments(args_string):
-    # Initialize defaults
-    options = {
-        max_agents: 5,
-        review_mode: "balanced",
-        profile: null,
-        branch_pattern: "feature/task-{id}",
-        status: false,
-        resume: false,
-        dry_run: false,
-        help: false,
-        task_ids: []
-    }
+    options = get_default_options()
+    args = tokenize_arguments(args_string)
+    task_ids = []
     
-    # Parse arguments
-    args = split_arguments(args_string)
     i = 0
-    
-    WHILE i < length(args):
+    WHILE i < args.length:
         arg = args[i]
         
+        # Long options with value (--option=value)
+        IF arg.startsWith("--") AND arg.includes("="):
+            [option, value] = arg.split("=", 2)
+            set_option(options, option, value)
+            
         # Long options
-        IF arg.startsWith("--"):
-            IF arg == "--help":
-                options.help = true
-            ELIF arg == "--status":
-                options.status = true
-            ELIF arg == "--resume":
-                options.resume = true
-            ELIF arg == "--dry-run":
-                options.dry_run = true
-            ELIF arg.contains("="):
-                [key, value] = arg.split("=")
-                CASE key:
-                    "--max-agents": options.max_agents = validate_number(value, 1, 20)
-                    "--review": options.review_mode = validate_review_mode(value)
-                    "--profile": options.profile = value
-                    "--branch": options.branch_pattern = value
+        ELIF arg.startsWith("--"):
+            option_name = arg.substring(2)
+            
+            # Boolean flags
+            IF is_boolean_option(option_name):
+                options[option_name] = true
             ELSE:
-                # Handle --option value format
-                next_arg = args[i+1] if exists
-                CASE arg:
-                    "--max-agents", "-m": 
-                        options.max_agents = validate_number(next_arg, 1, 20)
-                        i += 1
-                    "--review", "-r":
-                        options.review_mode = validate_review_mode(next_arg)
-                        i += 1
-                    "--profile", "-p":
-                        options.profile = next_arg
-                        i += 1
-                    "--branch", "-b":
-                        options.branch_pattern = next_arg
-                        i += 1
-        
+                # Next arg is the value
+                i++
+                IF i < args.length:
+                    set_option(options, "--" + option_name, args[i])
+                END
+            END
+            
         # Short options
-        ELIF arg.startsWith("-") AND not arg.isNumber():
-            CASE arg:
-                "-h": options.help = true
-                "-m": 
-                    options.max_agents = validate_number(args[i+1], 1, 20)
-                    i += 1
-                "-r":
-                    options.review_mode = validate_review_mode(args[i+1])
-                    i += 1
-                "-p":
-                    options.profile = args[i+1]
-                    i += 1
-                "-b":
-                    options.branch_pattern = args[i+1]
-                    i += 1
-        
+        ELIF arg.startsWith("-") AND not is_number(arg):
+            short_option = expand_alias(arg)
+            
+            IF is_boolean_option(short_option):
+                options[short_option.substring(2)] = true
+            ELSE:
+                i++
+                IF i < args.length:
+                    set_option(options, short_option, args[i])
+                END
+            END
+            
         # Positional arguments (task IDs)
-        ELIF arg.isNumber():
-            options.task_ids.push(parseInt(arg))
+        ELSE:
+            IF is_number(arg):
+                task_ids.push(parseInt(arg))
+            END
+        END
         
-        # Comma-separated task IDs
-        ELIF arg.matches(/^\d+(,\d+)*$/):
-            task_list = arg.split(",").map(parseInt)
-            options.task_ids.extend(task_list)
-        
-        i += 1
+        i++
     END
     
-    RETURN options
-END
-```
-
-**VALIDATION FUNCTIONS:**
-
-```
-FUNCTION validate_number(value, min, max):
-    num = parseInt(value)
-    IF isNaN(num):
-        ERROR: "Invalid number: {value}"
-    IF num < min OR num > max:
-        ERROR: "Value must be between {min} and {max}"
-    RETURN num
+    options.task_ids = task_ids
+    RETURN validate_options(options)
 END
 
-FUNCTION validate_review_mode(mode):
-    valid_modes = ["strict", "balanced", "lenient"]
-    IF mode NOT IN valid_modes:
-        ERROR: "Invalid review mode: {mode}. Must be one of: {valid_modes}"
-    RETURN mode
+FUNCTION set_option(options, option_key, value):
+    # Remove -- prefix
+    key = option_key.startsWith("--") ? option_key.substring(2) : option_key
+    
+    # Map common variations
+    IF key == "review": key = "review_mode"
+    IF key == "branch": key = "branch_pattern"
+    IF key == "agents": key = "max_agents"
+    
+    # Get option definition
+    option_def = OPTIONS[key]
+    IF not option_def:
+        throw new Error("Unknown option: " + option_key)
+    END
+    
+    # Parse and validate value
+    parsed_value = parse_value(value, option_def.type)
+    validated_value = validate_value(parsed_value, option_def)
+    
+    options[key] = validated_value
 END
-```
 
-**HELP TEXT GENERATION:**
+FUNCTION validate_value(value, option_def):
+    # Type check
+    IF option_def.type == "number":
+        IF not is_number(value):
+            throw new Error("Expected number, got: " + value)
+        END
+        num = Number(value)
+        IF option_def.min !== undefined AND num < option_def.min:
+            throw new Error("Value must be >= " + option_def.min)
+        END
+        IF option_def.max !== undefined AND num > option_def.max:
+            throw new Error("Value must be <= " + option_def.max)
+        END
+        RETURN num
+        
+    ELIF option_def.type == "string":
+        IF option_def.enum AND not option_def.enum.includes(value):
+            throw new Error("Value must be one of: " + option_def.enum.join(", "))
+        END
+        RETURN value
+        
+    ELIF option_def.type == "boolean":
+        RETURN value == true || value == "true" || value == "1"
+    END
+    
+    RETURN value
+END
 
-```
 FUNCTION show_help():
-    DISPLAY: """
-PARALLEL DEVELOPMENT ORCHESTRATION
-
-USAGE:
-  parallel-dev [OPTIONS] [TASK_IDS...]
-
-OPTIONS:
-  -h, --help              Show this help message
-  -m, --max-agents <N>    Maximum parallel agents (1-20, default: 5)
-  -r, --review <MODE>     Review mode: strict|balanced|lenient (default: balanced)
-  -p, --profile <NAME>    Load configuration profile
-  -b, --branch <PATTERN>  Branch pattern with {id} placeholder (default: feature/task-{id})
-      --status            Show current execution status
-      --resume            Resume previous session
-      --dry-run           Preview execution without running
-
-EXAMPLES:
-  parallel-dev                    # Auto-select available tasks
-  parallel-dev 8 9 14            # Develop specific tasks
-  parallel-dev 8,9,14            # Comma-separated task IDs
-  parallel-dev -m 3 -r strict    # Limit to 3 agents, strict review
-  parallel-dev --profile=ci      # Use CI configuration profile
-  parallel-dev --status          # Check current execution status
-  parallel-dev --resume          # Continue from last session
-
-CONFIGURATION PROFILES:
-  conservative  - 2 agents, strict review, extensive testing
-  balanced      - 5 agents, balanced review, standard testing
-  aggressive    - 10 agents, lenient review, minimal testing
-  ci            - Optimized for CI/CD environments
-"""
-END
-```
-
-**ERROR HANDLING:**
-
-```
-ON parsing_error:
-    DISPLAY: "Error: {error_message}"
-    DISPLAY: "Try 'parallel-dev --help' for usage information"
-    EXIT: with_error_code(1)
+    help_text = [
+        "Usage: /parallel-dev [options] [task_ids...]",
+        "",
+        "Options:",
+        "  -m, --max-agents <n>    Maximum concurrent agents (1-20, default: 5)",
+        "  -r, --review <mode>     Review mode: strict|balanced|lenient (default: balanced)",
+        "  -p, --profile <name>    Configuration profile to use",
+        "  -b, --branch <pattern>  Branch naming pattern (default: feature/task-{id})",
+        "  --status               Show current execution status",
+        "  --resume               Resume the last active session",
+        "  --dry-run              Show what would be done without executing",
+        "  -h, --help             Show this help message",
+        "",
+        "Examples:",
+        "  /parallel-dev                    # Process all available tasks",
+        "  /parallel-dev 8 9 14            # Process specific tasks",
+        "  /parallel-dev -m 2 -r strict    # Conservative execution",
+        "  /parallel-dev --status          # Check current status",
+        "  /parallel-dev --resume          # Continue previous session"
+    ]
+    
+    print(help_text.join("\n"))
 END
 ```
 
 **EXPORTS:**
-- `parse_arguments(args_string)` -> parsed options object
-- `show_help()` -> display help text
-- `validate_task_ids(ids)` -> validated task ID array
+- parse_arguments(args_string) -> Parsed options object
+- show_help() -> Display help text
+- validate_options(options) -> Validated options
+- get_default_options() -> Default option values

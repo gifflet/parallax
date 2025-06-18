@@ -1,394 +1,193 @@
 **EVENT BUS MODULE**
 
-Provides event-driven communication between agents and components for improved performance and decoupling.
+Provides publish-subscribe event system with aggregation and async handling.
 
-**PURPOSE:** Enable asynchronous, non-blocking communication with event subscriptions and emissions
+**CORE CONCEPTS:**
+- Decoupled event-driven communication
+- Event aggregation for performance
+- Wildcard subscriptions
+- Event history and replay
 
-**EVENT TYPES:**
+**EVENT STRUCTURE:**
 ```
-AGENT_EVENTS:
-  - agent.started
-  - agent.progress
-  - agent.completed
-  - agent.failed
-  - agent.heartbeat
-
-TASK_EVENTS:
-  - task.created
-  - task.assigned
-  - task.status_changed
-  - task.completed
-  - task.failed
-
-STATE_EVENTS:
-  - state.updated
-  - state.corrupted
-  - state.recovered
-
-SYSTEM_EVENTS:
-  - system.resource_warning
-  - system.cleanup_needed
-  - system.health_check
-```
-
-**CORE IMPLEMENTATION:**
-
-```
-# Event registry and handlers
-EVENT_HANDLERS = {}
-EVENT_QUEUE = []
-PROCESSING = false
-
-FUNCTION subscribe(event_pattern, handler, options = {}):
-    handler_id = generate_handler_id()
-    
-    handler_config = {
-        id: handler_id,
-        pattern: compile_pattern(event_pattern),
-        callback: handler,
-        priority: options.priority || 0,
-        max_retries: options.max_retries || 3,
-        timeout: options.timeout || 5000,
-        filter: options.filter || null
-    }
-    
-    IF not EVENT_HANDLERS[event_pattern]:
-        EVENT_HANDLERS[event_pattern] = []
-    END
-    
-    # Insert by priority
-    EVENT_HANDLERS[event_pattern].push(handler_config)
-    EVENT_HANDLERS[event_pattern].sort_by(h => h.priority)
-    
-    RETURN handler_id
-END
-
-FUNCTION unsubscribe(handler_id):
-    FOR pattern, handlers IN EVENT_HANDLERS:
-        EVENT_HANDLERS[pattern] = handlers.filter(h => h.id != handler_id)
-    END
-END
-
-FUNCTION emit(event_type, data = {}, options = {}):
-    event = {
-        id: generate_event_id(),
-        type: event_type,
-        data: data,
-        timestamp: iso_timestamp(),
-        source: options.source || "unknown",
-        correlation_id: options.correlation_id || null,
-        metadata: options.metadata || {}
-    }
-    
-    # Add to queue for async processing
-    EVENT_QUEUE.push(event)
-    
-    # Process queue if not already processing
-    IF not PROCESSING:
-        process_event_queue()
-    END
-    
-    RETURN event.id
-END
-
-FUNCTION emit_sync(event_type, data = {}, options = {}):
-    # Synchronous emission for critical events
-    event = {
-        id: generate_event_id(),
-        type: event_type,
-        data: data,
-        timestamp: iso_timestamp(),
-        source: options.source || "system",
-        correlation_id: options.correlation_id || null
-    }
-    
-    results = process_event(event)
-    RETURN results
-END
-```
-
-**EVENT PROCESSING:**
-
-```
-FUNCTION process_event_queue():
-    PROCESSING = true
-    
-    WHILE EVENT_QUEUE.length > 0:
-        event = EVENT_QUEUE.shift()
-        
-        TRY:
-            process_event(event)
-        CATCH error:
-            LOG_ERROR: "Event processing failed", {
-                event: event,
-                error: error.message
-            }
-            
-            # Re-queue if retriable
-            IF event.retry_count < 3:
-                event.retry_count = (event.retry_count || 0) + 1
-                EVENT_QUEUE.push(event)
-            END
-        END
-    END
-    
-    PROCESSING = false
-END
-
-FUNCTION process_event(event):
-    matched_handlers = []
-    
-    # Find all matching handlers
-    FOR pattern, handlers IN EVENT_HANDLERS:
-        IF matches_pattern(event.type, pattern):
-            matched_handlers.extend(handlers)
-        END
-    END
-    
-    # Sort by priority
-    matched_handlers.sort_by(h => h.priority)
-    
-    results = []
-    FOR handler IN matched_handlers:
-        # Apply filter if specified
-        IF handler.filter AND not handler.filter(event):
-            CONTINUE
-        END
-        
-        # Execute handler with timeout
-        result = execute_with_timeout(handler, event)
-        results.push(result)
-        
-        # Stop propagation if requested
-        IF result.stop_propagation:
-            BREAK
-        END
-    END
-    
-    RETURN results
-END
-
-FUNCTION execute_with_timeout(handler, event):
-    result = {
-        handler_id: handler.id,
-        success: false,
-        error: null,
-        stop_propagation: false
-    }
-    
-    TRY:
-        WITH_TIMEOUT(handler.timeout):
-            response = handler.callback(event)
-            result.success = true
-            result.response = response
-            result.stop_propagation = response?.stop_propagation || false
-        END
-    CATCH timeout_error:
-        result.error = "Handler timeout after " + handler.timeout + "ms"
-        LOG_ERROR: "Handler timeout", {
-            handler_id: handler.id,
-            event_type: event.type
-        }
-    CATCH error:
-        result.error = error.message
-        LOG_ERROR: "Handler error", {
-            handler_id: handler.id,
-            event_type: event.type,
-            error: error.message
-        }
-    END
-    
-    RETURN result
-END
-```
-
-**PATTERN MATCHING:**
-
-```
-FUNCTION compile_pattern(pattern):
-    # Support wildcards: agent.* matches all agent events
-    regex_pattern = pattern
-        .replace(".", "\\.")
-        .replace("*", ".*")
-        .replace("?", ".")
-    
-    RETURN new RegExp("^" + regex_pattern + "$")
-END
-
-FUNCTION matches_pattern(event_type, pattern):
-    IF typeof pattern == "string":
-        pattern = compile_pattern(pattern)
-    END
-    
-    RETURN pattern.test(event_type)
-END
-```
-
-**EVENT AGGREGATION:**
-
-```
-# Aggregate similar events to reduce noise
-EVENT_AGGREGATOR = {
-    buffers: {},
-    intervals: {}
+EVENT = {
+    name: "component.action",     # e.g., "task.completed"
+    data: {},                    # Event payload
+    timestamp: iso_timestamp(),
+    correlation_id: string,      # For tracing related events
+    source: string              # Component that emitted
 }
 
-FUNCTION emit_aggregated(event_type, data, options = {}):
-    aggregation_key = options.aggregation_key || event_type
+COMMON_EVENTS = [
+    "session.created", "session.completed", "session.failed",
+    "task.started", "task.progress", "task.completed", "task.failed",
+    "agent.started", "agent.completed", "agent.error",
+    "state.updated", "state.checkpoint",
+    "error.occurred", "error.recovered",
+    "config.changed", "health.checked"
+]
+```
+
+**MAIN FUNCTIONS:**
+
+```
+EVENT_BUS = {
+    subscribers: new Map(),      # event -> [callbacks]
+    event_history: [],          # Recent events
+    max_history: 1000,
+    aggregators: new Map()      # For batching events
+}
+
+FUNCTION emit(event_name, data = {}):
+    event = {
+        name: event_name,
+        data: data,
+        timestamp: iso_timestamp(),
+        correlation_id: get_current_correlation_id(),
+        source: get_caller_component()
+    }
+    
+    # Add to history
+    EVENT_BUS.event_history.push(event)
+    IF EVENT_BUS.event_history.length > EVENT_BUS.max_history:
+        EVENT_BUS.event_history.shift()
+    END
+    
+    # Notify subscribers
+    notify_subscribers(event)
+    
+    # Check aggregators
+    check_aggregators(event)
+END
+
+FUNCTION subscribe(event_pattern, callback):
+    IF not EVENT_BUS.subscribers.has(event_pattern):
+        EVENT_BUS.subscribers.set(event_pattern, [])
+    END
+    
+    EVENT_BUS.subscribers.get(event_pattern).push(callback)
+    
+    # Return unsubscribe function
+    RETURN () => {
+        callbacks = EVENT_BUS.subscribers.get(event_pattern)
+        index = callbacks.indexOf(callback)
+        IF index >= 0:
+            callbacks.splice(index, 1)
+        END
+    }
+END
+
+FUNCTION notify_subscribers(event):
+    # Direct subscribers
+    callbacks = EVENT_BUS.subscribers.get(event.name) || []
+    
+    # Wildcard subscribers
+    FOR [pattern, pattern_callbacks] IN EVENT_BUS.subscribers:
+        IF pattern.includes("*") AND matches_pattern(event.name, pattern):
+            callbacks.push(...pattern_callbacks)
+        END
+    END
+    
+    # Execute callbacks
+    FOR callback IN callbacks:
+        TRY:
+            callback(event)
+        CATCH error:
+            console.error("Event handler error:", error)
+        END
+    END
+END
+
+FUNCTION emit_aggregated(event_name, data, options = {}):
+    key = options.aggregation_key || event_name
     interval = options.aggregation_interval || 1000
     
-    IF not EVENT_AGGREGATOR.buffers[aggregation_key]:
-        EVENT_AGGREGATOR.buffers[aggregation_key] = []
-        
-        # Set up flush interval
-        EVENT_AGGREGATOR.intervals[aggregation_key] = SET_INTERVAL(interval, () => {
-            flush_aggregated_events(aggregation_key)
+    IF not EVENT_BUS.aggregators.has(key):
+        EVENT_BUS.aggregators.set(key, {
+            events: [],
+            timer: null,
+            interval: interval
         })
     END
     
-    EVENT_AGGREGATOR.buffers[aggregation_key].push({
-        type: event_type,
-        data: data,
-        timestamp: iso_timestamp()
-    })
+    aggregator = EVENT_BUS.aggregators.get(key)
+    aggregator.events.push({ name: event_name, data: data })
+    
+    # Reset timer
+    IF aggregator.timer:
+        clearTimeout(aggregator.timer)
+    END
+    
+    aggregator.timer = setTimeout(() => {
+        flush_aggregator(key)
+    }, interval)
 END
 
-FUNCTION flush_aggregated_events(aggregation_key):
-    buffer = EVENT_AGGREGATOR.buffers[aggregation_key]
-    IF buffer.length == 0:
+FUNCTION flush_aggregator(key):
+    aggregator = EVENT_BUS.aggregators.get(key)
+    IF not aggregator OR aggregator.events.length == 0:
         RETURN
     END
     
-    # Create aggregated event
-    aggregated_event = {
-        type: aggregation_key + ".aggregated",
-        count: buffer.length,
-        events: buffer,
-        start_time: buffer[0].timestamp,
-        end_time: buffer[buffer.length - 1].timestamp
-    }
+    # Emit aggregated event
+    emit(key + ".aggregated", {
+        count: aggregator.events.length,
+        events: aggregator.events,
+        interval: aggregator.interval
+    })
     
-    emit(aggregated_event.type, aggregated_event)
-    
-    # Clear buffer
-    EVENT_AGGREGATOR.buffers[aggregation_key] = []
+    # Clear
+    aggregator.events = []
+    aggregator.timer = null
 END
-```
 
-**BUILT-IN HANDLERS:**
-
-```
-# Dead letter queue for unhandled events
-subscribe("*", (event) => {
-    IF get_handler_count(event.type) == 1:  # Only this handler
-        LOG_WARN: "Unhandled event", {
-            type: event.type,
-            data: event.data
-        }
-    END
-}, { priority: -1000 })
-
-# Event metrics collector
-subscribe("*", (event) => {
-    update_event_metrics(event.type)
-}, { priority: -999 })
-
-# Health check responder
-subscribe("system.health_check", (event) => {
-    RETURN {
-        status: "healthy",
-        event_queue_size: EVENT_QUEUE.length,
-        handlers_registered: count_all_handlers(),
-        uptime: get_uptime()
-    }
-})
-```
-
-**UTILITY FUNCTIONS:**
-
-```
-FUNCTION wait_for_event(event_type, timeout = 5000, filter = null):
+FUNCTION wait_for_event(event_pattern, timeout = 5000):
     RETURN new Promise((resolve, reject) => {
-        timeout_handle = SET_TIMEOUT(timeout, () => {
-            unsubscribe(handler_id)
-            reject(new Error("Event wait timeout: " + event_type))
-        })
+        timer = setTimeout(() => {
+            unsubscribe()
+            reject(new Error("Event timeout: " + event_pattern))
+        }, timeout)
         
-        handler_id = subscribe(event_type, (event) => {
-            IF not filter OR filter(event):
-                CLEAR_TIMEOUT(timeout_handle)
-                unsubscribe(handler_id)
-                resolve(event)
-            END
+        unsubscribe = subscribe(event_pattern, (event) => {
+            clearTimeout(timer)
+            unsubscribe()
+            resolve(event)
         })
     })
 END
 
-FUNCTION emit_and_wait(event_type, data, response_event, timeout = 5000):
-    correlation_id = generate_correlation_id()
+FUNCTION replay_events(filter_fn, callback):
+    relevant_events = EVENT_BUS.event_history.filter(filter_fn)
     
-    # Emit with correlation ID
-    emit(event_type, data, { correlation_id: correlation_id })
-    
-    # Wait for correlated response
-    RETURN wait_for_event(response_event, timeout, (event) => {
-        RETURN event.correlation_id == correlation_id
-    })
+    FOR event IN relevant_events:
+        callback(event)
+    END
 END
 
-FUNCTION create_event_stream(event_pattern):
-    # Create an event stream for reactive programming
-    stream = {
-        handlers: [],
-        
-        subscribe: (handler) => {
-            handler_id = subscribe(event_pattern, handler)
-            stream.handlers.push(handler_id)
-            RETURN () => unsubscribe(handler_id)
-        },
-        
-        map: (transform) => {
-            new_stream = create_event_stream(event_pattern)
-            stream.subscribe((event) => {
-                transformed = transform(event)
-                new_stream._emit(transformed)
-            })
-            RETURN new_stream
-        },
-        
-        filter: (predicate) => {
-            new_stream = create_event_stream(event_pattern)
-            stream.subscribe((event) => {
-                IF predicate(event):
-                    new_stream._emit(event)
-                END
-            })
-            RETURN new_stream
-        },
-        
-        _emit: (event) => {
-            FOR handler_id IN stream.handlers:
-                get_handler(handler_id)?.callback(event)
-            END
-        },
-        
-        destroy: () => {
-            FOR handler_id IN stream.handlers:
-                unsubscribe(handler_id)
-            END
-        }
-    }
+FUNCTION get_event_stats(time_window = 60000):
+    cutoff = Date.now() - time_window
+    recent_events = EVENT_BUS.event_history.filter(e => 
+        Date.parse(e.timestamp) > cutoff
+    )
     
-    RETURN stream
+    stats = {}
+    FOR event IN recent_events:
+        IF not stats[event.name]:
+            stats[event.name] = 0
+        END
+        stats[event.name]++
+    END
+    
+    RETURN stats
 END
 ```
 
 **EXPORTS:**
-- `subscribe(pattern, handler, options)` -> Subscribe to events
-- `unsubscribe(handler_id)` -> Unsubscribe handler
-- `emit(event_type, data, options)` -> Emit event asynchronously
-- `emit_sync(event_type, data, options)` -> Emit event synchronously
-- `emit_aggregated(event_type, data, options)` -> Emit with aggregation
-- `wait_for_event(event_type, timeout, filter)` -> Wait for specific event
-- `emit_and_wait(event_type, data, response_event, timeout)` -> Request-response pattern
-- `create_event_stream(pattern)` -> Create reactive event stream
+- emit(event_name, data?) -> Emit event
+- subscribe(pattern, callback) -> Unsubscribe function
+- emit_aggregated(name, data, options?) -> Emit with aggregation
+- wait_for_event(pattern, timeout?) -> Promise<Event>
+- replay_events(filter, callback) -> Replay history
+- get_event_stats(window?) -> Event statistics
+- clear_history() -> Clear event history
+- set_correlation_id(id) -> Set correlation context
