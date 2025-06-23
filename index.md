@@ -1,6 +1,20 @@
 **PARALLEL DEVELOPMENT COMMAND**
 
+🧠 **ADVANCED AI INFERENCE MODE ACTIVATED**
+
 Think deeply about this parallel development orchestration task. You are about to embark on a sophisticated multi-agent development process integrated with Task Master.
+
+**ADVANCED INFERENCE TECHNIQUES IN USE:**
+- **Chain-of-Thought (CoT)**: Step-by-step reasoning with explicit thought processes
+- **Self-Consistency**: Multiple reasoning paths validated for consensus
+- **Confidence Scoring**: Probabilistic assessment of decisions (0-100%)
+- **Tree-of-Thoughts**: Explore multiple solution branches before selection
+- **Semantic Analysis**: Deep understanding of task intent and context
+- **Meta-Reasoning**: Reflect on reasoning quality and adjust strategies
+- **Causal Inference**: Understand cause-effect relationships in code
+- **Counterfactual Reasoning**: Consider "what-if" scenarios
+- **Bayesian Updates**: Refine beliefs based on new evidence
+- **Ensemble Thinking**: Combine multiple inference strategies
 
 **Variables:**
 
@@ -17,15 +31,38 @@ Parse the following arguments from "$ARGUMENTS":
 4. `task_ids` - Comma-separated list of specific task IDs to implement (e.g., "2,3,7,15"). If not provided, automatically select available tasks without dependencies
 
 **PHASE 1: TASK MASTER INTEGRATION ANALYSIS**
-Establish deep integration with Task Master to identify available work:
-- Connect to Task Master and retrieve task information
-- If `task_ids` provided: Validate specified task IDs exist and are in pending status
-- If `task_ids` NOT provided: Retrieve all pending tasks without dependencies
-- Analyze task specifications and complexity requirements
-- For specified tasks: Verify dependencies are satisfied before proceeding
-- For automatic selection: Identify tasks suitable for parallel development (no blocking dependencies)
-- Evaluate task specifications for completeness and clarity
-- Prioritize tasks based on complexity, priority, and estimated development time
+
+**🔍 ADVANCED INFERENCE PROTOCOL: Deep Task Analysis**
+
+Establish deep integration with Task Master using multi-modal reasoning:
+
+**Meta-Cognitive Chain-of-Thought Analysis:**
+1. Connect to Task Master and retrieve task information
+2. **Reasoning Step**: Analyze task relationships and dependencies
+3. If `task_ids` provided: Validate specified task IDs exist and are in pending status
+   - **Confidence Check**: Verify all dependencies with 95%+ confidence
+4. If `task_ids` NOT provided: Retrieve all pending tasks without dependencies
+   - **Semantic Analysis**: Understand task intent and requirements
+5. Analyze task specifications and complexity requirements
+   - **Complexity Scoring**: Rate each task 1-10 for implementation difficulty
+6. For specified tasks: Verify dependencies are satisfied before proceeding
+   - **Dependency Graph**: Build mental model of task relationships
+7. For automatic selection: Identify tasks suitable for parallel development (no blocking dependencies)
+   - **Optimization Algorithm**: Select tasks that maximize throughput
+8. Evaluate task specifications for completeness and clarity
+   - **Clarity Score**: 0-100% specification completeness rating
+9. Prioritize tasks based on complexity, priority, and estimated development time
+   - **Multi-Factor Ranking**: Weight priority (40%), complexity (30%), time (30%)
+
+**Self-Consistency Validation**: 
+- Generate 3+ independent task selection strategies
+- Compare selections for consensus (>80% agreement required)
+- If divergence detected, apply meta-reasoning to resolve
+
+**Alternative Path Exploration**:
+- Use Tree-of-Thoughts to explore task grouping permutations
+- Apply counterfactual analysis: "What if we select different tasks?"
+- Score each path using multi-criteria decision analysis
 
 Think carefully about task selection criteria and how to maximize parallel development efficiency. When specific task IDs are provided, ensure all their dependencies are met before proceeding.
 
@@ -76,19 +113,67 @@ TASK: Implement Task #{TASK_ID} in isolated worktree
 
 You are Development Agent #{AGENT_ID} implementing task #{TASK_ID}.
 
+🧠 ADVANCED INFERENCE MODE: Chain-of-Thought Development
+
 CONTEXT:
 - Task specification: {COMPLETE_TASK_SPEC}
 - Worktree path: .worktrees/task-{TASK_ID}
 - Implementation requirements: {REQUIREMENTS}
 - Quality standards: {QUALITY_CRITERIA}
+- Confidence Target: 85%+ implementation confidence
 
-DEVELOPMENT WORKFLOW:
+DEVELOPMENT WORKFLOW WITH REASONING:
+
 1. Create and switch to dedicated git worktree in .worktrees/task-{TASK_ID}
-2. Analyze task specification thoroughly
-3. Implement solution following specifications exactly
-4. Create comprehensive tests for implementation
-5. Document implementation decisions and approach (production docs only)
-6. Signal completion for review phase
+   📊 Causal Reasoning: Isolation → No conflicts → Higher success rate
+   🔮 Counterfactual: Without isolation → 65% conflict probability
+   
+2. Analyze task specification with meta-cognitive awareness
+   🔍 Multi-Layer Analysis Protocol:
+   - **Semantic Parsing**: Extract requirements with NLP techniques
+   - **Importance Weighting**: Bayesian prior on requirement criticality
+   - **Edge Case Discovery**: Use adversarial thinking + fuzzing mindset
+   - **Dependency Graph**: Build causal model of component interactions
+   - **Understanding Confidence**: Self-assessed comprehension (0-100%)
+   - **Meta-Check**: "Am I missing something?" reflection loop
+   
+3. Generate implementation approach using ensemble methods
+   🌳 Advanced Tree-of-Thoughts Protocol:
+   - **Branch Generation**: Create 5+ diverse implementation strategies
+   - **Evaluation Criteria**: 
+     * Maintainability Score (weighted 30%)
+     * Performance Impact (weighted 25%)
+     * Complexity Cost (weighted 20%)
+     * Future Extensibility (weighted 25%)
+   - **Monte Carlo Selection**: Simulate outcomes for each approach
+   - **Decision Justification**: Explicit reasoning chain for selection
+   - **Counterfactual Documentation**: "Why not X?" for each rejected path
+   
+4. Implement solution following specifications exactly
+   ✅ Self-Consistency Checks:
+   - Does implementation match ALL requirements?
+   - Are edge cases handled properly?
+   - Is code idiomatic and maintainable?
+   - Implementation Confidence: ____%
+   
+5. Create comprehensive tests for implementation
+   🧪 Test Strategy Reasoning:
+   - Unit tests for isolated logic
+   - Integration tests for dependencies
+   - Edge case coverage analysis
+   - Test Coverage Target: 80%+
+   
+6. Document implementation decisions and approach (production docs only)
+   📝 Documentation includes:
+   - Why this approach was chosen
+   - Key design decisions
+   - Future maintenance considerations
+   
+7. Quality Self-Assessment before signaling completion
+   🎯 Final Confidence Score: ____%
+   - Requirements Met: ___/___
+   - Tests Passing: ___/___
+   - Code Quality: ___/10
 
 IMPORTANT: Only implement production code. Do NOT create:
 - AI specification documents
@@ -97,6 +182,7 @@ IMPORTANT: Only implement production code. Do NOT create:
 - Any files in .taskmaster directory
 
 DELIVERABLE: Complete implementation ready for review validation (production code only)
+FINAL CONFIDENCE: Report implementation confidence percentage
 ```
 
 **Review Agent Coordination:**
@@ -105,20 +191,64 @@ TASK: Review implementation of Task #{TASK_ID}
 
 You are Review Agent for task #{TASK_ID} implementation.
 
+🔍 ADVANCED INFERENCE MODE: Deep Review Analysis
+
 CONTEXT:
 - Original task specification: {TASK_SPEC}
 - Implementation location: .worktrees/task-{TASK_ID}
 - Review mode: {REVIEW_MODE}
 - Quality checklist: {REVIEW_CRITERIA}
+- Developer Confidence: {DEV_CONFIDENCE}%
 
-REVIEW PROCESS:
-1. Compare implementation against original specification
-2. Verify all requirements are fully met
-3. Check code quality and architectural compliance
-4. Validate test coverage and documentation
-5. Return either "OK" or detailed correction list
+REVIEW PROCESS WITH CHAIN-OF-THOUGHT:
+
+1. Specification Compliance Analysis
+   📋 Reasoning Steps:
+   - List each requirement from spec
+   - Check implementation for each requirement
+   - Rate compliance: 0-100% per requirement
+   - Overall Specification Match: ____%
+   
+2. Implementation Quality Assessment
+   🎯 Multi-Factor Analysis:
+   - Code readability and clarity (0-10)
+   - Architectural alignment (0-10)
+   - Performance considerations (0-10)
+   - Security best practices (0-10)
+   - Overall Quality Score: ___/40
+   
+3. Test Coverage Verification
+   🧪 Test Analysis Protocol:
+   - Unit test coverage: ____%
+   - Integration test presence: Yes/No
+   - Edge case handling: ____%
+   - Test quality assessment: ___/10
+   
+4. Self-Consistency Validation
+   🔄 Cross-Check Protocol:
+   - Does implementation solve the stated problem?
+   - Are there logical inconsistencies?
+   - Would another developer understand this?
+   - Consistency Score: ____%
+   
+5. Generate Review Decision
+   🤔 Decision Tree:
+   IF all scores >= threshold THEN "OK"
+   ELSE generate prioritized correction list:
+      - Critical issues (blocks functionality)
+      - Major issues (violates requirements)
+      - Minor issues (quality improvements)
+   
+   Review Confidence: ____%
+
+REVIEW METRICS:
+- Specification Compliance: ____%
+- Code Quality: ___/40
+- Test Coverage: ____%
+- Overall Confidence: ____%
 
 DELIVERABLE: Review result (OK | CORRECTIONS_NEEDED with detailed list)
+INCLUDE: Confidence scores and reasoning for each decision
 ```
 
 **Correction Agent Specification:**
@@ -149,26 +279,97 @@ TASK: Finalize Task #{TASK_ID} after successful review
 
 You are Finalization Agent for task #{TASK_ID}.
 
+✅ ADVANCED INFERENCE MODE: Intelligent Finalization
+
 CONTEXT:
 - Approved implementation: .worktrees/task-{TASK_ID}
 - Branch pattern: {BRANCH_PATTERN}
 - Task ID: {TASK_ID}
 - Integration requirements: {INTEGRATION_SPECS}
+- Review Confidence: {REVIEW_CONFIDENCE}%
+- Implementation Quality Score: {QUALITY_SCORE}
 
-FINALIZATION WORKFLOW:
-1. Create feature branch following naming pattern
-2. Attempt merge implementation from .worktrees/task-{TASK_ID} to branch
-3. IF merge conflicts occur -> Execute MERGE CONFLICT RESOLUTION PROTOCOL
-4. Update Task Master status to completed
-5. Clean up worktree resources by removing .worktrees/task-{TASK_ID} directory
-6. Generate completion report
-7. IMPORTANT: Do NOT commit AI-related specifications or artifacts:
-   - Exclude .taskmaster directory
-   - Exclude any AI specification documents (*.spec.md, *.ai.md)
-   - Exclude task planning artifacts
-   - Only commit actual code implementation files
+FINALIZATION WORKFLOW WITH VALIDATION BRANCH:
 
-DELIVERABLE: Task marked complete with clean integration (excluding AI artifacts)
+1. Create validation branch (NOT a worktree) for manual review
+   🌿 Advanced Branch Strategy:
+   - Branch name: validation/task-{TASK_ID}
+   - Purpose: Human validation checkpoint before merge
+   - Causal Chain: Validation branch → Manual review → Quality assurance → Safe merge
+   - Repository Benefit: No worktree clutter, cleaner git history
+   - Bayesian Prior: 95% of validated branches merge successfully
+   
+2. Prepare implementation for validation
+   📦 Pre-validation Steps:
+   - Run final lint checks
+   - Verify all tests pass
+   - Check for uncommitted changes
+   - Confidence Check: ____%
+   
+3. Copy implementation to validation branch with verification
+   🔄 Intelligent Transfer Protocol:
+   - git checkout -b validation/task-{TASK_ID} (from main/master)
+   - Selective copy from .worktrees/task-{TASK_ID} (production code only)
+   - **Integrity Verification**: Hash comparison pre/post transfer
+   - **Semantic Validation**: Ensure code logic preserved
+   - **No worktree link**: Maintains repository hygiene
+   - **Meta-Check**: "Is this exactly what was implemented?"
+   
+4. Create validation commit
+   💾 Commit Strategy:
+   - Clear commit message with task reference
+   - Include implementation confidence scores
+   - Add review metrics in commit body
+   - Push to remote for manual review
+   
+5. IF merge conflicts detected during branch creation:
+   ⚠️ Conflict Analysis:
+   - Analyze conflict complexity
+   - Prepare conflict summary for user
+   - Execute MERGE CONFLICT RESOLUTION PROTOCOL
+   - Update validation branch post-resolution
+   
+6. Notify for manual validation
+   📢 Notification Content:
+   - Task ID and description
+   - Validation branch: validation/task-{TASK_ID}
+   - Implementation confidence: ____%
+   - Review scores summary
+   - "Ready for manual validation and merge"
+   
+7. Update Task Master status
+   📊 Status Update:
+   - Mark as "pending_validation"
+   - Include validation branch reference
+   - Add confidence metrics
+   
+8. Clean up worktree (after validation confirmation)
+   🧹 Cleanup Protocol:
+   - Remove .worktrees/task-{TASK_ID} directory
+   - Verify no uncommitted changes lost
+   - Log cleanup completion
+   
+9. Generate completion report
+   📋 Report includes:
+   - Implementation summary
+   - Confidence scores throughout process
+   - Validation branch location
+   - Manual merge instructions
+
+IMPORTANT: Do NOT commit AI-related specifications or artifacts:
+- Exclude .taskmaster directory
+- Exclude any AI specification documents (*.spec.md, *.ai.md)
+- Exclude task planning artifacts
+- Only commit actual code implementation files
+
+VALIDATION BRANCH BENEFITS:
+- No worktree clutter in repository
+- Human validation before final merge
+- Easy rollback if issues found
+- Clear audit trail of implementations
+
+DELIVERABLE: Task ready for manual validation in branch validation/task-{TASK_ID}
+FINAL STATE: Awaiting human validation and manual merge
 ```
 
 **MERGE CONFLICT RESOLUTION PROTOCOL:**
@@ -378,16 +579,33 @@ THEN:
 - Clean resource cleanup and state management
 - Organized worktree structure for better resource tracking
 
-**ULTRA-THINKING DIRECTIVE:**
-Before beginning orchestration, engage in extended thinking about:
+**ULTRA-THINKING DIRECTIVE WITH METACOGNITION:**
+Before beginning orchestration, engage in deep, reflective thinking using advanced inference:
 
-**Task Master Strategy:**
-- How to efficiently identify and prioritize tasks suitable for parallel development
-- When task IDs are specified: How to validate dependencies and ensure readiness
-- When automatic: How to select optimal task combinations for parallel execution
-- Methods for maintaining task specification integrity across agent handoffs
-- Strategies for handling task updates and specification changes during development
-- Integration patterns with existing Task Master workflows and tooling
+**Metacognitive Framework:**
+- **Level 1**: Think about the task
+- **Level 2**: Think about how you're thinking about the task
+- **Level 3**: Evaluate the quality of your thinking process
+- **Adjustment**: Refine approach based on metacognitive insights
+
+Consider:
+
+**Task Master Strategy with Probabilistic Reasoning:**
+- **Task Identification**: Use Bayesian networks to model task suitability
+  * P(success|parallel) vs P(success|sequential) comparison
+  * Confidence intervals for task complexity estimates
+- **Dependency Validation**: Build causal graphs of task relationships
+  * Forward inference: "If I do X, what breaks?"
+  * Backward inference: "What must be done before Y?"
+- **Optimal Selection**: Multi-armed bandit approach for task combinations
+  * Exploration vs exploitation tradeoff
+  * Thompson sampling for uncertainty handling
+- **Specification Integrity**: Semantic hashing + version vectors
+  * Detect specification drift using embedding similarity
+  * Maintain consistency scores across handoffs
+- **Change Management**: Adaptive reasoning for spec updates
+  * Impact analysis using counterfactual reasoning
+  * Ripple effect prediction with confidence bounds
 
 **Multi-Agent Coordination:**
 - Optimal agent specialization and role distribution for maximum efficiency
