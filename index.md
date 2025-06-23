@@ -43,16 +43,24 @@ Establish deep integration with Task Master using multi-modal reasoning:
    - **Confidence Check**: Verify all dependencies with 95%+ confidence
 4. If `task_ids` NOT provided: Retrieve all pending tasks without dependencies
    - **Semantic Analysis**: Understand task intent and requirements
-5. Analyze task specifications and complexity requirements
+5. **PARALLELIZATION STRATEGY DECISION**: Intelligent mode selection
+   - **IF multiple independent tasks available**: Execute **TASK-LEVEL PARALLELIZATION**
+     * Each agent handles one complete task from start to finish
+     * Maximum efficiency through task-level isolation
+   - **IF only one task available**: Execute **SUBTASK-LEVEL PARALLELIZATION**  
+     * Break single task into parallel subtasks
+     * Multiple agents work on subtasks of the same parent task
+   - **Confidence Threshold**: 85%+ confidence in strategy selection
+6. Analyze task specifications and complexity requirements
    - **Complexity Scoring**: Rate each task 1-10 for implementation difficulty
-6. For specified tasks: Verify dependencies are satisfied before proceeding
+7. For specified tasks: Verify dependencies are satisfied before proceeding
    - **Dependency Graph**: Build mental model of task relationships
-7. For automatic selection: Identify tasks suitable for parallel development (no blocking dependencies)
+8. For automatic selection: Identify tasks suitable for parallel development (no blocking dependencies)
    - **Optimization Algorithm**: Select tasks that maximize throughput
-8. Evaluate task specifications for completeness and clarity
+9. Evaluate task specifications for completeness and clarity
    - **Clarity Score**: 0-100% specification completeness rating
-9. Prioritize tasks based on complexity, priority, and estimated development time
-   - **Multi-Factor Ranking**: Weight priority (40%), complexity (30%), time (30%)
+10. Prioritize tasks based on complexity, priority, and estimated development time
+    - **Multi-Factor Ranking**: Weight priority (40%), complexity (30%), time (30%)
 
 **Self-Consistency Validation**: 
 - Generate 3+ independent task selection strategies
@@ -94,10 +102,19 @@ Based on Task Master analysis and environment assessment:
 **PHASE 4: MULTI-AGENT ORCHESTRATION**
 Deploy specialized agents in coordinated parallel execution:
 
-**Agent Distribution Strategy:**
-- For 1-3 tasks: Launch all development agents simultaneously
+**Adaptive Agent Distribution Strategy:**
+
+**TASK-LEVEL PARALLELIZATION** (Multiple independent tasks):
+- For 1-3 tasks: Launch all development agents simultaneously  
 - For 4-8 tasks: Launch in waves of 3-4 agents to manage coordination
 - For 9+ tasks: Launch waves of max_agents size with queue management
+- Each agent handles complete task lifecycle independently
+
+**SUBTASK-LEVEL PARALLELIZATION** (Single task with subtasks):
+- Break parent task into parallel subtasks
+- Launch agents equal to number of subtasks (up to max_agents limit)
+- Coordinate subtask integration and dependencies
+- Ensure subtask agents communicate for consistency
 
 **Development Agent Coordination Protocol:**
 Each Development Agent receives:
@@ -115,12 +132,17 @@ You are Development Agent #{AGENT_ID} implementing task #{TASK_ID}.
 
 🧠 ADVANCED INFERENCE MODE: Chain-of-Thought Development
 
+EXECUTION MODE: {PARALLELIZATION_MODE}
+- **TASK-LEVEL MODE**: Complete entire task independently
+- **SUBTASK-LEVEL MODE**: Implement specific subtask of parent task
+
 CONTEXT:
 - Task specification: {COMPLETE_TASK_SPEC}
 - Worktree path: .worktrees/task-{TASK_ID}
 - Implementation requirements: {REQUIREMENTS}
 - Quality standards: {QUALITY_CRITERIA}
 - Confidence Target: 85%+ implementation confidence
+- **IF SUBTASK MODE**: Parent task ID: {PARENT_TASK_ID}, Subtask scope: {SUBTASK_DEFINITION}
 
 DEVELOPMENT WORKFLOW WITH REASONING:
 
@@ -136,6 +158,7 @@ DEVELOPMENT WORKFLOW WITH REASONING:
    - **Dependency Graph**: Build causal model of component interactions
    - **Understanding Confidence**: Self-assessed comprehension (0-100%)
    - **Meta-Check**: "Am I missing something?" reflection loop
+   - **IF SUBTASK MODE**: Focus analysis on subtask scope and parent task integration points
    
 3. Generate implementation approach using ensemble methods
    🌳 Advanced Tree-of-Thoughts Protocol:
@@ -148,12 +171,14 @@ DEVELOPMENT WORKFLOW WITH REASONING:
    - **Monte Carlo Selection**: Simulate outcomes for each approach
    - **Decision Justification**: Explicit reasoning chain for selection
    - **Counterfactual Documentation**: "Why not X?" for each rejected path
+   - **IF SUBTASK MODE**: Ensure approach aligns with parent task architecture and other subtasks
    
 4. Implement solution following specifications exactly
    ✅ Self-Consistency Checks:
    - Does implementation match ALL requirements?
    - Are edge cases handled properly?
    - Is code idiomatic and maintainable?
+   - **IF SUBTASK MODE**: Does implementation integrate properly with parent task?
    - Implementation Confidence: ____%
    
 5. Create comprehensive tests for implementation
@@ -161,6 +186,7 @@ DEVELOPMENT WORKFLOW WITH REASONING:
    - Unit tests for isolated logic
    - Integration tests for dependencies
    - Edge case coverage analysis
+   - **IF SUBTASK MODE**: Integration tests with other subtasks
    - Test Coverage Target: 80%+
    
 6. Document implementation decisions and approach (production docs only)
@@ -486,8 +512,20 @@ USER DECISION VALIDATION:
 ```
 
 **Parallel Execution Management:**
+
+**TASK-LEVEL MODE:**
 - Create `.worktrees` directory structure for task isolation
 - Launch Development Agents for each selected task simultaneously in separate worktrees
+- Each agent works independently on complete task lifecycle
+- Minimal inter-agent coordination required
+
+**SUBTASK-LEVEL MODE:**
+- Create single `.worktrees/task-{PARENT_ID}` structure with subtask organization
+- Launch Development Agents for each subtask in shared parent context
+- Coordinate subtask integration and consistency across agents
+- Manage subtask dependencies and communication protocols
+
+**COMMON ORCHESTRATION:**
 - Monitor agent progress and resource utilization across worktree instances
 - Coordinate Review Agent deployment upon development completion
 - Manage Correction Agent cycles for failed reviews
@@ -507,27 +545,35 @@ For sustained parallel development, orchestrate continuous task processing:
 4. **Progress Monitoring**: Track completion rates and quality metrics
 5. **Resource Optimization**: Balance parallel load with system capabilities
 
-**Continuous Processing Cycle:**
+**Adaptive Continuous Processing Cycle:**
 ```
 IF task_ids provided:
     1. Validate all specified task IDs and their readiness
-    2. Process specified tasks in optimal batches
+    2. DETERMINE PARALLELIZATION MODE:
+       - IF multiple independent tasks -> TASK-LEVEL PARALLELIZATION
+       - IF single task -> SUBTASK-LEVEL PARALLELIZATION
+    3. Process using selected mode
 ELSE:
     WHILE available_tasks > 0 AND system_capacity > threshold:
         1. Query Task Master for pending tasks without dependencies
-        2. Select optimal task set for parallel processing
+        2. INTELLIGENT MODE SELECTION:
+           - Count independent tasks available
+           - IF count > 1 -> TASK-LEVEL PARALLELIZATION
+           - IF count = 1 -> SUBTASK-LEVEL PARALLELIZATION
+        3. Select optimal task/subtask set for parallel processing
         
 THEN:
-    3. Allocate worktrees and launch Development Agents
-    4. Monitor development progress and completion
-    5. Deploy Review Agents for completed implementations
-    6. Handle review outcomes (OK -> Finalization, Corrections -> Correction Agent)
-    7. Process Correction Agent outputs through re-review cycle
-    8. Execute Finalization Agents for approved implementations
-    9. **IF merge conflicts detected -> Execute Merge Conflict Resolution Protocol**
-    10. **Handle user interaction and apply conflict resolution decisions**
-    11. Update Task Master status and clean up resources
-    12. Assess system capacity for next wave (if automatic mode)
+    4. Allocate worktrees according to parallelization mode
+    5. Launch Development Agents with appropriate context
+    6. Monitor development progress and completion
+    7. Deploy Review Agents for completed implementations
+    8. Handle review outcomes (OK -> Finalization, Corrections -> Correction Agent)
+    9. Process Correction Agent outputs through re-review cycle
+    10. Execute Finalization Agents for approved implementations
+    11. **IF merge conflicts detected -> Execute Merge Conflict Resolution Protocol**
+    12. **Handle user interaction and apply conflict resolution decisions**
+    13. Update Task Master status and clean up resources
+    14. Assess system capacity for next wave (if automatic mode)
 ```
 
 **Quality Assurance Pipeline:**
@@ -536,13 +582,25 @@ THEN:
 - **Integration Quality**: Branch management, merge conflict resolution
 - **Process Quality**: Agent coordination, resource management
 
-**Resource Management Strategy:**
-- Dynamic worktree allocation and cleanup within `.worktrees` directory
-- Structured worktree naming convention: `.worktrees/task-{TASK_ID}`
-- Agent lifecycle management with proper resource release
+**Adaptive Resource Management Strategy:**
+
+**TASK-LEVEL PARALLELIZATION:**
+- Dynamic worktree allocation: `.worktrees/task-{TASK_ID}` per independent task
+- Isolated resource management per task
+- Independent agent lifecycle management
+- Minimal cross-task coordination overhead
+
+**SUBTASK-LEVEL PARALLELIZATION:**
+- Shared worktree context: `.worktrees/task-{PARENT_ID}` with subtask organization  
+- Coordinated resource sharing among subtask agents
+- Managed subtask integration points
+- Enhanced inter-agent communication protocols
+
+**COMMON RESOURCE MANAGEMENT:**
 - Memory and processing optimization across parallel streams
 - Git repository integrity and branch management
 - Automatic cleanup of unused worktree instances
+- Adaptive resource allocation based on parallelization mode
 
 **EXECUTION PRINCIPLES:**
 
@@ -573,11 +631,12 @@ THEN:
 - Clean integration with main development branch
 
 **Resource Optimization:**
-- Intelligent worktree management within `.worktrees` directory preventing resource exhaustion
-- Parallel processing balanced with system capabilities
-- Efficient agent deployment and lifecycle management
+- **TASK-LEVEL**: Independent worktree management (`.worktrees/task-{ID}`) preventing resource exhaustion
+- **SUBTASK-LEVEL**: Coordinated worktree sharing (`.worktrees/task-{PARENT_ID}`) with subtask organization
+- Parallel processing balanced with system capabilities and selected parallelization mode
+- Efficient agent deployment and lifecycle management adapted to execution mode
 - Clean resource cleanup and state management
-- Organized worktree structure for better resource tracking
+- Organized worktree structure optimized for parallelization strategy
 
 **ULTRA-THINKING DIRECTIVE WITH METACOGNITION:**
 Before beginning orchestration, engage in deep, reflective thinking using advanced inference:
@@ -613,13 +672,22 @@ Consider:
 - Error handling and recovery mechanisms for failed agent executions
 - Load balancing strategies for varying task complexity and agent capabilities
 
-**Git Worktree Management:**
-- Efficient worktree creation, isolation, and cleanup strategies within `.worktrees` directory
-- Structured naming convention: `.worktrees/task-{TASK_ID}` for task isolation
-- Branch management and merge conflict prevention across parallel streams
+**Adaptive Git Worktree Management:**
+
+**TASK-LEVEL PARALLELIZATION:**
+- Independent worktree creation: `.worktrees/task-{TASK_ID}` per task
+- Isolated branch management preventing cross-task conflicts
+- Simple integration patterns for independent task streams
+
+**SUBTASK-LEVEL PARALLELIZATION:**
+- Coordinated worktree management: `.worktrees/task-{PARENT_ID}` with subtask organization
+- Shared context with managed subtask integration points
+- Complex merge patterns for subtask consolidation
+
+**COMMON WORKTREE PRINCIPLES:**
 - Repository integrity maintenance with multiple concurrent modifications
-- Integration patterns for merging parallel work streams
 - Centralized worktree location for better organization and cleanup
+- Adaptive cleanup strategies based on parallelization mode
 
 **Quality Control Implementation:**
 - Review agent design ensuring thorough specification compliance checking
