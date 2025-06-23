@@ -1,8 +1,8 @@
-name: parallel-dev
+name: parallax
 version: 1.0.0
 description: Multi-agent development orchestration system for concurrent task implementation with Task Master integration
 author: gifflet
-repository: https://github.com/gifflet/parallel-dev
+repository: https://github.com/gifflet/parallax
 entry: index.md
 tags:
   - development
