@@ -150,6 +150,11 @@ DEVELOPMENT WORKFLOW WITH REASONING:
    📊 Causal Reasoning: Isolation → No conflicts → Higher success rate
    🔮 Counterfactual: Without isolation → 65% conflict probability
    
+   🗂️ File Tracking Setup:
+   - Initialize task file tracking: Create mental list of files to be modified
+   - Track file operations: CREATE, MODIFY, DELETE for task-specific files only
+   - Maintain staging discipline: Never use `git add .` during development
+   
 2. Analyze task specification with meta-cognitive awareness
    🔍 Multi-Layer Analysis Protocol:
    - **Semantic Parsing**: Extract requirements with NLP techniques
@@ -200,6 +205,19 @@ DEVELOPMENT WORKFLOW WITH REASONING:
    - Requirements Met: ___/___
    - Tests Passing: ___/___
    - Code Quality: ___/10
+   
+8. Prepare selective staging of task files
+   📂 Task File Staging Protocol:
+   - List all files created, modified, or removed during task implementation
+   - Verify each file is directly related to task requirements
+   - Use selective `git add <file>` for each task-relevant file
+   - AVOID `git add .` to prevent staging unrelated changes
+   - Example staging commands:
+     ```
+     git add src/feature/implementation.js
+     git add tests/feature/implementation.test.js
+     git add docs/feature/README.md
+     ```
 
 IMPORTANT: Only implement production code. Do NOT create:
 - AI specification documents
@@ -330,6 +348,19 @@ FINALIZATION WORKFLOW WITH VALIDATION BRANCH:
    - Run final lint checks
    - Verify all tests pass
    - Check for uncommitted changes
+   - **Validate staging integrity**: Ensure only task-related files are staged
+   - **Staging verification protocol**:
+     ```
+     git status --porcelain  # Review all changes
+     git diff --cached       # Review staged changes
+     ```
+   - **Selective staging execution**:
+     ```
+     # Stage only task-specific files (NEVER git add .)
+     git add path/to/created/file.js
+     git add path/to/modified/file.js
+     git rm path/to/deleted/file.js  # if applicable
+     ```
    - Confidence Check: ____%
    
 3. Copy implementation to validation branch with verification
@@ -465,7 +496,9 @@ RESOLUTION APPLICATION WORKFLOW:
    - Validate syntax if applicable (compile check for code files)
    - Ensure file integrity after resolution
 
-4. Stage resolved files (`git add {resolved_files}`)
+4. Stage resolved files using selective staging (`git add <specific-resolved-file>`)
+   - Apply selective staging principles: stage only conflict-resolved files
+   - Example: `git add src/conflicted-file.js` (NOT `git add .` )
 5. Create resolution commit with descriptive message
 6. Continue with finalization process
 
@@ -616,6 +649,21 @@ THEN:
 - Do not version control task specifications, AI prompts, or planning documents
 - Only commit actual implementation code, tests, and production documentation
 - Use .gitignore to prevent accidental inclusion of AI artifacts
+
+**Git Staging Strategy:**
+- NEVER use `git add .` or `git add -A` to stage all files indiscriminately
+- ALWAYS stage only files that were created, modified, or removed during the specific task
+- Use selective staging: `git add <specific-file-path>` for each relevant file
+- Maintain a tracking list of task-related files during development
+- Before staging, verify each file is directly related to the task being implemented
+- Use `git status` to review changes before staging
+- Example selective staging:
+  ```
+  git add src/components/NewFeature.js
+  git add src/tests/NewFeature.test.js
+  git add src/utils/helper.js
+  # NOT: git add .
+  ```
 
 **Agent Coordination:**
 - Clear specialization roles to avoid agent overlap and conflicts
