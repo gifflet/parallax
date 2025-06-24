@@ -339,8 +339,9 @@ FINALIZATION WORKFLOW WITH VALIDATION BRANCH:
    🌿 Advanced Branch Strategy:
    - Branch name: validation/task-{TASK_ID}
    - Purpose: Human validation checkpoint before merge
-   - Causal Chain: Validation branch → Manual review → Quality assurance → Safe merge
-   - Repository Benefit: No worktree clutter, cleaner git history
+   - **Source**: Created from task worktree commit (NOT from main/master)
+   - Causal Chain: Task worktree commit → Validation branch → Manual review → Quality assurance → Safe merge
+   - Repository Benefit: No worktree clutter, cleaner git history, preserves exact task implementation state
    - Bayesian Prior: 95% of validated branches merge successfully
    
 2. Prepare implementation for validation
@@ -365,7 +366,16 @@ FINALIZATION WORKFLOW WITH VALIDATION BRANCH:
    
 3. Copy implementation to validation branch with verification
    🔄 Intelligent Transfer Protocol:
-   - git checkout -b validation/task-{TASK_ID} (from main/master)
+   - **Extract commit from task worktree**:
+     ```
+     git worktree list --porcelain | grep ".worktrees/task-{TASK_ID}" -A 2 | grep "HEAD" | cut -d' ' -f2
+     ```
+   - **Create validation branch from task commit**:
+     ```
+     COMMIT_FROM_TASK_WORKTREE=$(git worktree list --porcelain | grep ".worktrees/task-{TASK_ID}" -A 2 | grep "HEAD" | cut -d' ' -f2)
+     git branch validation/task-{TASK_ID} $COMMIT_FROM_TASK_WORKTREE
+     git checkout validation/task-{TASK_ID}
+     ```
    - Selective copy from .worktrees/task-{TASK_ID} (production code only)
    - **Integrity Verification**: Hash comparison pre/post transfer
    - **Semantic Validation**: Ensure code logic preserved
